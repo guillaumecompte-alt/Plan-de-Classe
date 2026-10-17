@@ -1,0 +1,84 @@
+@import "tailwindcss" source(none);
+@source "../src";
+@import "tw-animate-css";
+
+@theme inline {
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --font-sans: "Nunito", system-ui, sans-serif;
+  --font-display: "Fraunces", Georgia, serif;
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-floor: var(--floor);
+  --color-desk: var(--desk);
+  --color-desk-edge: var(--desk-edge);
+  --color-tag: var(--tag);
+  --color-tag-foreground: var(--tag-foreground);
+  --color-tag-girl: var(--tag-girl);
+  --color-tag-boy: var(--tag-boy);
+}
+
+:root {
+  --radius: 0.6rem;
+  --background: oklch(0.97 0.015 85);
+  --foreground: oklch(0.25 0.03 150);
+  --card: oklch(0.995 0.005 85);
+  --card-foreground: oklch(0.25 0.03 150);
+  --primary: oklch(0.42 0.08 155);
+  --primary-foreground: oklch(0.98 0.01 85);
+  --secondary: oklch(0.92 0.03 85);
+  --secondary-foreground: oklch(0.3 0.03 150);
+  --muted: oklch(0.93 0.02 85);
+  --muted-foreground: oklch(0.5 0.03 150);
+  --accent: oklch(0.8 0.14 75);
+  --accent-foreground: oklch(0.25 0.03 60);
+  --destructive: oklch(0.58 0.2 27);
+  --border: oklch(0.85 0.03 85);
+  --input: oklch(0.85 0.03 85);
+  --ring: oklch(0.42 0.08 155);
+  --floor: oklch(0.9 0.035 80);
+  --desk: oklch(0.78 0.08 65);
+  --desk-edge: oklch(0.6 0.08 55);
+  --tag: oklch(0.96 0.08 95);
+  --tag-foreground: oklch(0.28 0.04 70);
+  --tag-girl: oklch(0.92 0.05 10);
+  --tag-boy: oklch(0.92 0.05 240);
+}
+
+@layer base {
+  * { border-color: var(--color-border); }
+  body { background-color: var(--color-background); color: var(--color-foreground); font-family: var(--font-sans); }
+}
+
+.floor-pattern {
+  background-color: var(--floor);
+  background-image: repeating-linear-gradient(90deg, transparent 0 46px, color-mix(in oklab, var(--desk-edge) 15%, transparent) 46px 48px);
+}
+
+/* Étiquette posée : hauteur de case imposée, écriture la plus grande qui tient en 3 lignes */
+.tag-seated {
+  font-size: var(--tag-fs, 12px);
+  line-height: 1.12;
+}
+
+@media print {
+  @page { size: A4 portrait; margin: 10mm; }
+  html, body { background: white !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .tag-seated { font-size: calc(var(--tag-fs, 12px) * 0.74); }
+}
