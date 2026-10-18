@@ -266,7 +266,7 @@ function Index() {
               ))}
             </div>
             <div className="mt-10 grid grid-cols-3 gap-4 print:mt-6">
-              <div className="col-start-2 rounded-md border-2 border-desk-edge bg-desk py-4 text-center font-display font-semibold text-tag-foreground shadow-lg">
+              <div className="col-start-2 rounded-md border-2 border-desk-edge bg-desk py-4 text-center font-display font-semibold text-white shadow-lg">
                 Bureau du professeur
               </div>
             </div>
