@@ -35,30 +35,32 @@
 }
 
 :root {
-  --radius: 0.6rem;
-  --background: oklch(0.97 0.015 85);
-  --foreground: oklch(0.25 0.03 150);
-  --card: oklch(0.995 0.005 85);
-  --card-foreground: oklch(0.25 0.03 150);
-  --primary: oklch(0.42 0.08 155);
-  --primary-foreground: oklch(0.98 0.01 85);
-  --secondary: oklch(0.92 0.03 85);
-  --secondary-foreground: oklch(0.3 0.03 150);
-  --muted: oklch(0.93 0.02 85);
-  --muted-foreground: oklch(0.5 0.03 150);
-  --accent: oklch(0.8 0.14 75);
-  --accent-foreground: oklch(0.25 0.03 60);
-  --destructive: oklch(0.58 0.2 27);
-  --border: oklch(0.85 0.03 85);
-  --input: oklch(0.85 0.03 85);
-  --ring: oklch(0.42 0.08 155);
-  --floor: oklch(0.9 0.035 80);
-  --desk: oklch(0.78 0.08 65);
-  --desk-edge: oklch(0.6 0.08 55);
-  --tag: oklch(0.96 0.08 95);
-  --tag-foreground: oklch(0.28 0.04 70);
-  --tag-girl: oklch(0.92 0.05 10);
-  --tag-boy: oklch(0.92 0.05 240);
+  /* Identité visuelle Banque d’applis : fond nuit, surfaces ardoise, violet lumineux */
+  --radius: 0.75rem;
+  --background: #11101b;
+  --foreground: #f5f3ff;
+  --card: #1b1929;
+  --card-foreground: #f5f3ff;
+  --primary: #a78bfa;
+  --primary-foreground: #171326;
+  --secondary: #29253d;
+  --secondary-foreground: #eee9ff;
+  --muted: #242136;
+  --muted-foreground: #b7b0cc;
+  --accent: #8b5cf6;
+  --accent-foreground: #ffffff;
+  --destructive: #fb7185;
+  --border: #39334f;
+  --input: #39334f;
+  --ring: #a78bfa;
+  /* L’espace de classe reste légèrement contrasté, les étiquettes restent lisibles */
+  --floor: #28243a;
+  --desk: #65518c;
+  --desk-edge: #a78bfa;
+  --tag: #fff4c2;
+  --tag-foreground: #282039;
+  --tag-girl: #ffe0eb;
+  --tag-boy: #dce9ff;
 }
 
 @layer base {
