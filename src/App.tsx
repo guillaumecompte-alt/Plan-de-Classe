@@ -1,4 +1,3 @@
-import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 
 import { ImportPanel } from "@/components/plan/ImportPanel";
@@ -30,27 +29,6 @@ import {
   type PlaceMode,
 } from "@/lib/plan";
 
-export const Route = createFileRoute("/")({
-  head: () => ({
-    meta: [
-      { title: "Plan de classe — glisser-déposer les élèves" },
-      {
-        name: "description",
-        content:
-          "Importez votre liste Excel et placez vos élèves dans la classe par glisser-déposer.",
-      },
-      { property: "og:title", content: "Plan de classe" },
-      {
-        property: "og:description",
-        content: "Importez une liste Excel et créez votre plan de classe en glisser-déposer.",
-      },
-      { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary" },
-    ],
-  }),
-  component: Index,
-});
-
 type Notice = { text: string; tone: "info" | "error"; undo?: ClassPlan | undefined };
 
 // Format A4 imprimable (marges de 10 mm), en pixels CSS
@@ -58,13 +36,25 @@ const A4_LONG = 1047;
 const A4_SHORT = 718;
 const SCREEN_SEAT_H = 56; // hauteur d'une place à l'écran (h-14)
 
-// État identique côté serveur et navigateur ; le vrai état est chargé ensuite depuis le navigateur
-const INITIAL: AppState = { classes: [{ ...emptyClass(), id: "initial" }], currentId: "initial" };
+function readSaved(): AppState {
+  let v2: string | null = null;
+  let v1: string | null = null;
+  try {
+    v2 = localStorage.getItem(STORAGE_V2);
+    v1 = localStorage.getItem(STORAGE_V1);
+  } catch {
+    /* stockage indisponible (navigation privée stricte) */
+  }
+  return loadState(v2, v1);
+}
 
-function Index() {
-  const [app, setApp] = useState<AppState>(INITIAL);
-  const [loaded, setLoaded] = useState(false);
-  const [tab, setTab] = useState<"import" | "plan">("import");
+export function App() {
+  // Les classes sont relues depuis le navigateur dès l'ouverture de la page
+  const [app, setApp] = useState<AppState>(readSaved);
+  const [tab, setTab] = useState<"import" | "plan">(() => {
+    const cur = app.classes.find((c) => c.id === app.currentId);
+    return cur?.students.length ? "plan" : "import";
+  });
   const [notice, setNotice] = useState<Notice | null>(null);
   const [selected, setSelected] = useState<string | null>(null);
   const [planW, setPlanW] = useState(0);
@@ -73,25 +63,8 @@ function Index() {
 
   const cls = app.classes.find((c) => c.id === app.currentId) ?? (app.classes[0] as ClassPlan);
 
-  // --- Chargement / enregistrement dans le navigateur
+  // --- Enregistrement dans le navigateur à chaque modification
   useEffect(() => {
-    let v2: string | null = null;
-    let v1: string | null = null;
-    try {
-      v2 = localStorage.getItem(STORAGE_V2);
-      v1 = localStorage.getItem(STORAGE_V1);
-    } catch {
-      /* stockage indisponible (navigation privée stricte) */
-    }
-    const state = loadState(v2, v1);
-    setApp(state);
-    const cur = state.classes.find((c) => c.id === state.currentId);
-    if (cur?.students.length) setTab("plan");
-    setLoaded(true);
-    document.fonts?.ready.then(() => setFontsReady((n) => n + 1)).catch(() => {});
-  }, []);
-  useEffect(() => {
-    if (!loaded) return;
     try {
       localStorage.setItem(STORAGE_V2, JSON.stringify(app));
     } catch {
@@ -100,7 +73,11 @@ function Index() {
         tone: "error",
       });
     }
-  }, [app, loaded]);
+  }, [app]);
+  // Les noms sont remesurés une fois la police chargée
+  useEffect(() => {
+    document.fonts?.ready.then(() => setFontsReady((n) => n + 1)).catch(() => {});
+  }, []);
 
   // --- Largeur du plan, pour ajuster la taille des noms
   useEffect(() => {

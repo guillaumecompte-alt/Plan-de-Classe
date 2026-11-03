@@ -1,5 +1,5 @@
 import { useMemo, useRef, useState } from "react";
-import * as XLSX from "xlsx";
+import type { WorkBook } from "xlsx";
 
 import {
   detectMapping,
@@ -23,7 +23,9 @@ const colLetter = (i: number) => {
 };
 
 async function readRows(f: File): Promise<unknown[][]> {
-  let wb: XLSX.WorkBook;
+  // La bibliothèque Excel (≈ 400 ko) n'est chargée qu'au moment d'un import
+  const XLSX = await import("xlsx");
+  let wb: WorkBook;
   if (/\.(csv|txt)$/i.test(f.name)) {
     // Excel enregistre souvent ses CSV en Windows-1252 : on essaie UTF-8 puis on se rabat dessus
     const buf = await f.arrayBuffer();
