@@ -7,7 +7,7 @@ on place les élèves par glisser-déposer ou automatiquement, puis on imprime /
 chargés depuis un autre site. Les classes sont enregistrées dans le navigateur et peuvent être exportées
 dans un fichier de sauvegarde pour les retrouver sur un autre ordinateur.
 
-Site en ligne : https://guillaumecompte-alt.github.io/Plan-de-Classe/
+Site en ligne : https://plan-de-classe.outilotheque.fr/
 
 ## Fonctionnalités
 
@@ -39,23 +39,23 @@ npm run preview   # affiche le site final en local
 Technologies : React, TypeScript, Vite, Tailwind CSS. Le site final est un simple dossier de fichiers
 statiques (`dist/`), utilisable sur n'importe quel hébergement.
 
-| Fichier | Rôle |
-| --- | --- |
-| `src/lib/plan.ts` | Toute la logique, sans interface : import, salle, placement, sauvegarde (testée dans `plan.test.ts`) |
-| `src/App.tsx` | La page |
-| `src/components/plan/` | Glisser-déposer tactile, étiquettes, import, réglages de la salle et placement |
-| `src/styles.css` | Couleurs, impression |
+| Fichier                | Rôle                                                                                                 |
+| ---------------------- | ---------------------------------------------------------------------------------------------------- |
+| `src/lib/plan.ts`      | Toute la logique, sans interface : import, salle, placement, sauvegarde (testée dans `plan.test.ts`) |
+| `src/App.tsx`          | La page                                                                                              |
+| `src/components/plan/` | Glisser-déposer tactile, étiquettes, import, réglages de la salle et placement                       |
+| `src/styles.css`       | Couleurs, impression                                                                                 |
 
 ## Mise en ligne
 
-À chaque modification de la branche `main`, GitHub vérifie le code (lint, tests, construction) puis publie
-le site sur GitHub Pages (`.github/workflows/deploy.yml`). Si une vérification échoue, le site en ligne
-reste sur la version précédente.
+Le site est hébergé sur **Cloudflare**, qui le reconstruit automatiquement depuis la branche `main`
+(commande `npm run build`, dossier `dist/`) et le sert sur https://plan-de-classe.outilotheque.fr/.
 
-Réglage à faire une seule fois : **Settings → Pages → Build and deployment → Source : GitHub Actions**.
+En parallèle, GitHub vérifie chaque modification (lint, tests, construction) :
+`.github/workflows/verifier.yml`. Une croix rouge sur un commit signale un problème à corriger.
 
-Pour un autre hébergeur (Netlify, Cloudflare Pages, serveur de l'établissement…), il suffit de publier le
-dossier `dist/` produit par `npm run build`.
+Les classes sont enregistrées dans le navigateur **pour une adresse donnée** : changer l'adresse du site
+fait repartir les utilisateurs d'une liste vide (ils peuvent alors importer une sauvegarde).
 
 ## Bibliothèque Excel
 

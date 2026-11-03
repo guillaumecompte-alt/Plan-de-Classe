@@ -1,0 +1,32 @@
+# Vérifie le code à chaque modification : lint, tests et construction.
+# La mise en ligne est faite par Cloudflare, qui reconstruit le site depuis la
+# branche main (https://plan-de-classe.outilotheque.fr).
+name: Vérifier le code
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: verif-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verifier:
+    name: Lint, tests et construction
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npm test
+      - run: npm run build
