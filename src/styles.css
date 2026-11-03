@@ -7,7 +7,8 @@
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
-  --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-sans:
+    "Inter", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --font-display: "Inter", ui-sans-serif, system-ui, sans-serif;
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -64,10 +65,16 @@
 }
 
 @layer base {
-  * { border-color: var(--color-border); }
+  * {
+    border-color: var(--color-border);
+  }
   body {
     background-color: var(--color-background);
-    background-image: radial-gradient(ellipse at 50% -20%, rgba(91, 77, 187, .18), transparent 48%);
+    background-image: radial-gradient(
+      ellipse at 50% -20%,
+      rgba(91, 77, 187, 0.18),
+      transparent 48%
+    );
     background-attachment: fixed;
     color: var(--color-foreground);
     font-family: var(--font-sans);
@@ -76,17 +83,56 @@
 
 .floor-pattern {
   background-color: var(--floor);
-  background-image: repeating-linear-gradient(90deg, transparent 0 46px, color-mix(in oklab, var(--desk-edge) 15%, transparent) 46px 48px);
+  background-image: repeating-linear-gradient(
+    90deg,
+    transparent 0 46px,
+    color-mix(in oklab, var(--desk-edge) 15%, transparent) 46px 48px
+  );
 }
 
-/* Étiquette posée : hauteur de case imposée, écriture la plus grande qui tient en 3 lignes */
+/* Étiquette posée : la taille d'écriture (--tag-fs) est calculée en mesurant le nom dans sa place */
 .tag-seated {
+  line-height: 1.12;
+}
+.tag-name {
+  display: block;
+  max-width: 100%;
   font-size: var(--tag-fs, 12px);
   line-height: 1.12;
+  hyphens: manual;
+}
+/* Appui long sur tablette : pas de menu contextuel ni de loupe pendant le glissement */
+.student-tag {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
 }
 
 @media print {
-  @page { size: A4 portrait; margin: 10mm; }
-  html, body { background: white !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-  .tag-seated { font-size: calc(var(--tag-fs, 12px) * 0.74); }
+  /* Impression sur fond blanc : la salle et les tables passent en clair pour économiser l'encre */
+  :root {
+    --floor: #ffffff;
+    --card: #ffffff;
+    --desk: #ecebf5;
+    --desk-edge: #6d64b8;
+  }
+  html,
+  body {
+    background: white !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  .floor-pattern {
+    background-image: none;
+  }
+  .plan-print,
+  .teacher-desk {
+    color: #282039 !important;
+  }
+  /* --print-scale et --print-seat-h sont calculés selon la taille de la salle */
+  .tag-name {
+    font-size: calc(var(--tag-fs, 12px) * var(--print-scale, 0.74));
+  }
+  .seat {
+    height: var(--print-seat-h, 48px) !important;
+  }
 }
