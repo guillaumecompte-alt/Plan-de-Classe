@@ -1,29 +1,36 @@
-# Welcome to your Lovable project
+# Plan de classe
 
-This project was built with [Lovable](https://lovable.dev).
+Application web pour faire le plan de classe de ses élèves : on importe la liste (Excel, LibreOffice, CSV),
+on place les élèves par glisser-déposer ou automatiquement, puis on imprime / exporte en PDF.
 
-## Build with Lovable
+Aucune donnée ne quitte le navigateur : les classes sont enregistrées localement, et peuvent être
+exportées dans un fichier de sauvegarde pour les retrouver sur un autre ordinateur.
 
-Open your project in the [Lovable editor](https://lovable.dev) and keep building.
+## Fonctionnalités
 
-- **Ship faster**: describe what you want to build and Lovable handles the code.
-- **Stay in sync**: connect the project to GitHub and every change made in Lovable is committed straight to your repository.
-- **Full ownership**: this code is yours. Push to your repository and your changes sync back into Lovable, ready for your next prompt.
+- **Import de liste** : colonnes du nom, du prénom et du genre détectées automatiquement (exports Pronote,
+  ENT, tableur), avec aperçu et correction avant d'importer. Réimporter une liste garde la place des élèves
+  dont le nom n'a pas changé.
+- **Placement à la souris, au doigt et au clavier** : glisser-déposer (appui long sur tablette / TBI), ou
+  toucher un élève puis une place. Poser un élève sur une place occupée échange les deux.
+- **Plusieurs classes**, chacune avec son plan.
+- **Salle configurable** : 1 à 6 colonnes de tables, 1 à 10 rangées, 1 à 4 places par table.
+- **Placement automatique** : au hasard ou en alternant filles et garçons, en plaçant devant les élèves
+  prioritaires et en séparant les élèves qui ne doivent pas être voisins. Bouton « Annuler ».
+- **Impression / PDF** : fond clair, portrait ou paysage selon la largeur de la salle, sur une page.
+- **Sauvegarde** : export / import de toutes les classes dans un fichier `.json`.
 
-## Development
+## Développement
 
-Prefer working locally? You need Node.js and npm — [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating).
+Projet [Lovable](https://lovable.dev) (TanStack Start, React, TypeScript, Tailwind CSS).
 
 ```sh
-git clone <this-repository-url>
-cd <repository-name>
 npm i
-npm run dev
+npm run dev     # serveur de développement
+npm test        # tests (logique d'import, de placement et de sauvegarde)
+npm run build
 ```
 
-## Built with
-
-- TanStack Start
-- TypeScript
-- React
-- Tailwind CSS
+- `src/lib/plan.ts` : toute la logique, sans interface (testée dans `plan.test.ts`).
+- `src/components/plan/` : glisser-déposer tactile, étiquettes, import, réglages de la salle et placement.
+- `src/routes/index.tsx` : la page.
