@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- Plan de classe : deux rangées de tables et le bureau du professeur -->
+  <rect width="64" height="64" rx="14" fill="#141b30"/>
+  <rect x="9" y="10" width="20" height="13" rx="3.5" fill="#dce9ff"/>
+  <rect x="35" y="10" width="20" height="13" rx="3.5" fill="#ffe0eb"/>
+  <rect x="9" y="28" width="20" height="13" rx="3.5" fill="#ffe0eb"/>
+  <rect x="35" y="28" width="20" height="13" rx="3.5" fill="#dce9ff"/>
+  <rect x="17" y="47" width="30" height="8" rx="3" fill="#9586ff"/>
+</svg>
