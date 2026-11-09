@@ -34,6 +34,46 @@ export const DEFAULT_LAYOUT: Layout = { cols: 3, rows: 6, per: 2 };
 /** Nombre de rangées considérées comme « devant » pour les élèves prioritaires. */
 export const FRONT_ROWS = 2;
 
+/** Classes proposées dans le menu « Nom de la classe », dans cet ordre. */
+export const CLASS_NAMES = [
+  "6A",
+  "6D",
+  "6R",
+  "5A",
+  "5D",
+  "5R",
+  "4A",
+  "4D",
+  "4R",
+  "3A",
+  "3D",
+  "3R",
+] as const;
+export type ClassName = (typeof CLASS_NAMES)[number];
+
+/**
+ * Ramène un nom saisi librement (anciennes versions) à un nom de la liste :
+ * « 3r », « 3 R », « 3e R », « 3ème R » → « 3R ». Renvoie null s'il ne correspond à aucune classe.
+ */
+export function canonicalClassName(name: string): ClassName | null {
+  const n = name
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toUpperCase()
+    .replace(/\s+/g, "")
+    .replace(/^(\d)(EME|E)(?=[A-Z]$)/, "$1");
+  return (CLASS_NAMES as readonly string[]).includes(n) ? (n as ClassName) : null;
+}
+
+export const isValidClassName = (name: string) => (CLASS_NAMES as readonly string[]).includes(name);
+
+/** Nom du fichier PDF : « 6A_plandeclasse_09.11.2026 » (date du jour de l'export). */
+export function pdfFileName(className: string, date = new Date()): string {
+  const dd = String(date.getDate()).padStart(2, "0");
+  const mm = String(date.getMonth() + 1).padStart(2, "0");
+  return `${className}_plandeclasse_${dd}.${mm}.${date.getFullYear()}`;
+}
+
 export const seatKey = (c: number, r: number, s: number) => `${c}-${r}-${s}`;
 
 export function parseSeatKey(k: string): { c: number; r: number; s: number } | null {
@@ -168,7 +208,11 @@ export function sanitizeClass(raw: unknown): ClassPlan | null {
     : [];
   return normalizeClass({
     id: typeof raw["id"] === "string" && raw["id"] ? raw["id"] : newId(),
-    name: typeof raw["name"] === "string" ? raw["name"] : "",
+    // Les anciens noms libres (« 3r », « 3e R ») sont ramenés à la liste quand c'est possible
+    name:
+      typeof raw["name"] === "string"
+        ? (canonicalClassName(raw["name"]) ?? raw["name"].trim())
+        : "",
     students,
     seats,
     layout,

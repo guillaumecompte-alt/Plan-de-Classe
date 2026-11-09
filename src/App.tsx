@@ -19,7 +19,9 @@ import {
   seatKey,
   STORAGE_V1,
   STORAGE_V2,
-  uniqueName,
+  CLASS_NAMES,
+  isValidClassName,
+  pdfFileName,
   withLayout,
   type AppState,
   type ClassPlan,
@@ -119,12 +121,7 @@ export function App() {
     setTab(next?.students.length ? "plan" : "import");
   };
   const addClass = () => {
-    const c = emptyClass(
-      uniqueName(
-        "Nouvelle classe",
-        app.classes.map((x) => x.name),
-      ),
-    );
+    const c = emptyClass();
     setApp((a) => ({ classes: [...a.classes, c], currentId: c.id }));
     setSelected(null);
     setNotice(null);
@@ -144,16 +141,10 @@ export function App() {
 
   const onImport = (list: { name: string; gender: Gender }[], into: "current" | "new") => {
     if (into === "new") {
-      const base = emptyClass(
-        uniqueName(
-          "Nouvelle classe",
-          app.classes.map((x) => x.name),
-        ),
-      );
-      const { cls: c } = applyImport(base, list);
+      const { cls: c } = applyImport(emptyClass(), list);
       setApp((a) => ({ classes: [...a.classes, c], currentId: c.id }));
       setNotice({
-        text: `${list.length} élèves importés dans une nouvelle classe. Pensez à lui donner un nom.`,
+        text: `${list.length} élèves importés dans une nouvelle classe. Choisissez son nom dans le menu.`,
         tone: "info",
       });
     } else {
@@ -266,17 +257,47 @@ export function App() {
   // Petite marge de sécurité : à l'impression, les arrondis de mise en page diffèrent de l'écran
   const printScale = 0.94 * Math.min(1, (printSeatH - 4) / (SCREEN_SEAT_H - 4), widthRatio);
 
+  // --- Export PDF : le nom de la classe est obligatoire
+  const nameRef = useRef<HTMLSelectElement>(null);
+  const [nameMissing, setNameMissing] = useState(false);
+  const hasName = isValidClassName(cls.name);
   const print = () => {
+    if (!isValidClassName(cls.name)) {
+      setNameMissing(true);
+      setNotice({
+        text: "Choisissez le nom de la classe avant d'exporter en PDF.",
+        tone: "error",
+      });
+      nameRef.current?.focus();
+      return;
+    }
+    setNameMissing(false);
+    setNotice(null);
     setTab("plan");
     setSelected(null);
     const prevTitle = document.title;
-    const label = cls.name.trim();
+    // Le navigateur utilise le titre de la page comme nom du fichier PDF
+    const fileName = pdfFileName(cls.name);
     window.setTimeout(() => {
-      document.title = label ? `Plan de classe — ${label}` : prevTitle;
+      document.title = fileName;
       window.print();
       document.title = prevTitle;
     }, 150);
   };
+  // Ctrl+P / Cmd+P passe par la même vérification que le bouton
+  const printRef = useRef(print);
+  printRef.current = print;
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "p") {
+        e.preventDefault();
+        printRef.current();
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
+  const takenNames = new Set(app.classes.filter((c) => c.id !== cls.id).map((c) => c.name));
 
   const field =
     "rounded-md border bg-background px-3 py-1.5 text-sm outline-none focus:ring-2 focus:ring-primary";
@@ -308,15 +329,45 @@ export function App() {
             >
               + Classe
             </button>
-            <input
-              value={cls.name}
-              onChange={(e) => updateClass((c) => ({ ...c, name: e.target.value }))}
-              placeholder="Nom de la classe"
+            <select
+              ref={nameRef}
+              value={hasName ? cls.name : ""}
+              onChange={(e) => {
+                const name = e.target.value;
+                updateClass((c) => ({ ...c, name }));
+                if (name) {
+                  setNameMissing(false);
+                  setNotice(null);
+                }
+              }}
               aria-label="Nom de la classe"
-              className={`${field} w-40`}
-            />
+              aria-invalid={nameMissing && !hasName ? true : undefined}
+              required
+              className={`rounded-md border bg-background px-3 py-1.5 text-sm outline-none w-44 ${
+                nameMissing && !hasName
+                  ? "border-destructive ring-2 ring-destructive"
+                  : "focus:ring-2 focus:ring-primary"
+              }`}
+            >
+              <option value="" disabled>
+                {cls.name.trim() && !hasName
+                  ? `Nom (était « ${cls.name.trim()} »)`
+                  : "Nom de la classe…"}
+              </option>
+              {[6, 5, 4, 3].map((level) => (
+                <optgroup key={level} label={`${level}e`}>
+                  {CLASS_NAMES.filter((n) => n.startsWith(String(level))).map((n) => (
+                    <option key={n} value={n} disabled={takenNames.has(n)}>
+                      {n}
+                      {takenNames.has(n) ? " (déjà utilisée)" : ""}
+                    </option>
+                  ))}
+                </optgroup>
+              ))}
+            </select>
             <button
               onClick={print}
+              title={hasName ? undefined : "Choisissez d'abord le nom de la classe"}
               className="rounded-md border border-primary px-4 py-1.5 text-sm font-semibold text-primary hover:bg-secondary"
             >
               Exporter en PDF

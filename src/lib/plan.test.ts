@@ -3,6 +3,8 @@ import { describe, expect, it } from "vitest";
 import {
   applyImport,
   autoPlace,
+  canonicalClassName,
+  CLASS_NAMES,
   conflictPairs,
   detectMapping,
   emptyClass,
@@ -13,6 +15,7 @@ import {
   moveStudent,
   parseBackup,
   parseGender,
+  pdfFileName,
   rowsToStudents,
   seatKey,
   withLayout,
@@ -195,7 +198,7 @@ describe("sauvegarde", () => {
     const state = loadState(null, v1);
     expect(state.classes).toHaveLength(1);
     const cls = state.classes[0] as ClassPlan;
-    expect(cls.name).toBe("4e A");
+    expect(cls.name).toBe("4A"); // ancien nom libre ramené à la liste
     expect(cls.seats).toEqual({ "1-0-0": "0-Léa" });
   });
 
@@ -212,5 +215,25 @@ describe("sauvegarde", () => {
   it("refuse un fichier qui n'est pas une sauvegarde", () => {
     expect(() => parseBackup("bonjour")).toThrow(/sauvegarde/);
     expect(() => parseBackup('{"foo":1}')).toThrow(/sauvegarde/);
+  });
+});
+
+describe("nom de la classe et export PDF", () => {
+  it("propose les 12 classes dans l'ordre demandé", () => {
+    expect(CLASS_NAMES.join(";")).toBe("6A;6D;6R;5A;5D;5R;4A;4D;4R;3A;3D;3R");
+  });
+
+  it("ramène les anciens noms libres à la liste quand c'est possible", () => {
+    expect(canonicalClassName("3R")).toBe("3R");
+    expect(canonicalClassName(" 3r ")).toBe("3R");
+    expect(canonicalClassName("6e A")).toBe("6A");
+    expect(canonicalClassName("5ème D")).toBe("5D");
+    expect(canonicalClassName("5e B")).toBeNull();
+    expect(canonicalClassName("Nouvelle classe")).toBeNull();
+  });
+
+  it("nomme le fichier Classe_plandeclasse_JJ.MM.AAAA", () => {
+    expect(pdfFileName("6A", new Date(2026, 10, 9))).toBe("6A_plandeclasse_09.11.2026");
+    expect(pdfFileName("3R", new Date(2027, 0, 25))).toBe("3R_plandeclasse_25.01.2027");
   });
 });
