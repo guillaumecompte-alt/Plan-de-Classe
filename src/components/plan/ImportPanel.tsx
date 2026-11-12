@@ -43,20 +43,11 @@ async function readRows(f: File): Promise<unknown[][]> {
 type Props = {
   current: ClassPlan;
   onImport: (list: { name: string; gender: Gender }[], into: "current" | "new") => void;
-  onExportBackup: () => void;
-  onImportBackup: (file: File) => void;
   onDeleteClass: () => void;
 };
 
-export function ImportPanel({
-  current,
-  onImport,
-  onExportBackup,
-  onImportBackup,
-  onDeleteClass,
-}: Props) {
+export function ImportPanel({ current, onImport, onDeleteClass }: Props) {
   const fileRef = useRef<HTMLInputElement>(null);
-  const backupRef = useRef<HTMLInputElement>(null);
   const [parsed, setParsed] = useState<Parsed | null>(null);
   const [error, setError] = useState("");
   const [over, setOver] = useState(false);
@@ -277,35 +268,9 @@ export function ImportPanel({
         </section>
       )}
 
-      <section className="rounded-xl border bg-card p-5" aria-labelledby="save-title">
-        <h2 id="save-title" className="font-display text-lg font-semibold">
-          Sauvegarde
-        </h2>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Vos classes sont enregistrées dans ce navigateur uniquement. Pour les retrouver sur un
-          autre ordinateur ou les mettre à l'abri, exportez une sauvegarde puis importez-la de
-          l'autre côté.
-        </p>
-        <div className="mt-4 flex flex-wrap gap-2">
-          <button onClick={onExportBackup} className={`${btn} border-primary text-primary`}>
-            Exporter toutes les classes
-          </button>
-          <button onClick={() => backupRef.current?.click()} className={btn}>
-            Importer une sauvegarde
-          </button>
-          <input
-            ref={backupRef}
-            type="file"
-            accept=".json,application/json"
-            hidden
-            onChange={(e) => {
-              const f = e.target.files?.[0];
-              if (f) onImportBackup(f);
-              e.target.value = "";
-            }}
-          />
-        </div>
-      </section>
+      <p className="text-center text-xs text-muted-foreground">
+        Vos classes sont enregistrées dans ce navigateur, sur cet ordinateur uniquement.
+      </p>
 
       <div className="text-right">
         <button

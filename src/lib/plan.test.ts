@@ -8,12 +8,9 @@ import {
   conflictPairs,
   detectMapping,
   emptyClass,
-  exportBackup,
   frontMisses,
   loadState,
-  mergeClasses,
   moveStudent,
-  parseBackup,
   parseGender,
   pdfFileName,
   rowsToStudents,
@@ -188,7 +185,7 @@ describe("placement automatique", () => {
   });
 });
 
-describe("sauvegarde", () => {
+describe("enregistrement dans le navigateur", () => {
   it("convertit l'ancien plan (rangée 5 = devant) vers le nouveau format", () => {
     const v1 = JSON.stringify({
       className: "4e A",
@@ -200,21 +197,6 @@ describe("sauvegarde", () => {
     const cls = state.classes[0] as ClassPlan;
     expect(cls.name).toBe("4A"); // ancien nom libre ramené à la liste
     expect(cls.seats).toEqual({ "1-0-0": "0-Léa" });
-  });
-
-  it("exporte puis réimporte plusieurs classes sans écraser l'existant", () => {
-    const a = classWith(kids(2), { name: "5e B" });
-    const b = { ...emptyClass("6e C"), students: kids(1) };
-    const back = parseBackup(exportBackup([a, b]));
-    expect(back.map((c) => c.name)).toEqual(["5e B", "6e C"]);
-    const merged = mergeClasses([a], back);
-    expect(merged.map((c) => c.name)).toEqual(["5e B", "5e B (2)", "6e C"]);
-    expect(new Set(merged.map((c) => c.id)).size).toBe(3);
-  });
-
-  it("refuse un fichier qui n'est pas une sauvegarde", () => {
-    expect(() => parseBackup("bonjour")).toThrow(/sauvegarde/);
-    expect(() => parseBackup('{"foo":1}')).toThrow(/sauvegarde/);
   });
 });
 

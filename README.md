@@ -4,8 +4,7 @@ Application web pour faire le plan de classe de ses élèves : on importe la lis
 on place les élèves par glisser-déposer ou automatiquement, puis on imprime / exporte en PDF.
 
 **Aucune donnée ne quitte le navigateur** : pas de compte, pas de serveur, pas de police ni de script
-chargés depuis un autre site. Les classes sont enregistrées dans le navigateur et peuvent être exportées
-dans un fichier de sauvegarde pour les retrouver sur un autre ordinateur.
+chargés depuis un autre site. Les classes sont enregistrées dans le navigateur, sur l'ordinateur utilisé.
 
 Site en ligne : https://plan-de-classe.outilotheque.fr/
 
@@ -21,7 +20,6 @@ Site en ligne : https://plan-de-classe.outilotheque.fr/
 - **Placement automatique** : au hasard ou en alternant filles et garçons, en plaçant devant les élèves
   prioritaires et en séparant les élèves qui ne doivent pas être voisins. Bouton « Annuler ».
 - **Impression / PDF** : fond clair, portrait ou paysage selon la largeur de la salle, sur une page.
-- **Sauvegarde** : export / import de toutes les classes dans un fichier `.json`.
 
 ## Travailler sur le code
 
@@ -39,12 +37,12 @@ npm run preview   # affiche le site final en local
 Technologies : React, TypeScript, Vite, Tailwind CSS. Le site final est un simple dossier de fichiers
 statiques (`dist/`), utilisable sur n'importe quel hébergement.
 
-| Fichier                | Rôle                                                                                                 |
-| ---------------------- | ---------------------------------------------------------------------------------------------------- |
-| `src/lib/plan.ts`      | Toute la logique, sans interface : import, salle, placement, sauvegarde (testée dans `plan.test.ts`) |
-| `src/App.tsx`          | La page                                                                                              |
-| `src/components/plan/` | Glisser-déposer tactile, étiquettes, import, réglages de la salle et placement                       |
-| `src/styles.css`       | Couleurs, impression                                                                                 |
+| Fichier                | Rôle                                                                                                     |
+| ---------------------- | -------------------------------------------------------------------------------------------------------- |
+| `src/lib/plan.ts`      | Toute la logique, sans interface : import, salle, placement, enregistrement (testée dans `plan.test.ts`) |
+| `src/App.tsx`          | La page                                                                                                  |
+| `src/components/plan/` | Glisser-déposer tactile, étiquettes, import, réglages de la salle et placement                           |
+| `src/styles.css`       | Couleurs, impression                                                                                     |
 
 ## Mise en ligne
 
@@ -55,7 +53,7 @@ En parallèle, GitHub vérifie chaque modification (lint, tests, construction) :
 `.github/workflows/verifier.yml`. Une croix rouge sur un commit signale un problème à corriger.
 
 Les classes sont enregistrées dans le navigateur **pour une adresse donnée** : changer l'adresse du site
-fait repartir les utilisateurs d'une liste vide (ils peuvent alors importer une sauvegarde).
+fait repartir les utilisateurs d'une liste vide : il faut alors réimporter les listes Excel.
 
 ## Bibliothèque Excel
 

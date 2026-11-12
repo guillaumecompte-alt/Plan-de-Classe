@@ -1,5 +1,5 @@
 // Logique du plan de classe, sans interface : classes, salle, import Excel,
-// placement automatique et sauvegarde. Tout est pur et testé (plan.test.ts).
+// placement automatique et enregistrement dans le navigateur. Tout est pur et testé (plan.test.ts).
 
 export type Gender = "F" | "M" | null;
 export type Student = { id: string; name: string; gender: Gender };
@@ -164,7 +164,7 @@ export function moveStudent(seats: Record<string, string>, id: string, target: s
 }
 
 // ---------------------------------------------------------------------------
-// Lecture des données sauvegardées (stockage du navigateur ou fichier de sauvegarde)
+// Lecture des données enregistrées dans le navigateur
 
 const isObj = (v: unknown): v is Record<string, unknown> =>
   typeof v === "object" && v !== null && !Array.isArray(v);
@@ -261,58 +261,6 @@ export function loadState(v2: string | null, v1: string | null): AppState {
   const old = migrateV1(parse(v1));
   const cls = old ?? emptyClass();
   return { classes: [cls], currentId: cls.id };
-}
-
-// ---------------------------------------------------------------------------
-// Sauvegarde dans un fichier
-
-export function exportBackup(classes: ClassPlan[], now = new Date()): string {
-  return JSON.stringify(
-    { app: "plan-de-classe", version: 2, exportedAt: now.toISOString(), classes },
-    null,
-    2,
-  );
-}
-
-export function parseBackup(text: string): ClassPlan[] {
-  let data: unknown;
-  try {
-    data = JSON.parse(text);
-  } catch {
-    throw new Error("Ce fichier n'est pas une sauvegarde de plan de classe.");
-  }
-  let list: unknown[] | null = null;
-  if (isObj(data) && Array.isArray(data["classes"])) list = data["classes"];
-  else if (isObj(data) && Array.isArray(data["students"])) list = [data];
-  if (!list) throw new Error("Ce fichier n'est pas une sauvegarde de plan de classe.");
-  const classes = list.map(sanitizeClass).filter((c): c is ClassPlan => c !== null);
-  if (!classes.length) throw new Error("La sauvegarde ne contient aucune classe.");
-  return classes;
-}
-
-export function uniqueName(name: string, taken: string[]): string {
-  const base = name.trim() || "Classe";
-  const set = new Set(taken.map((t) => t.trim().toLowerCase()));
-  if (!set.has(base.toLowerCase())) return base;
-  for (let i = 2; ; i++) {
-    const cand = `${base} (${i})`;
-    if (!set.has(cand.toLowerCase())) return cand;
-  }
-}
-
-/** Ajoute les classes d'une sauvegarde sans écraser les classes existantes. */
-export function mergeClasses(existing: ClassPlan[], incoming: ClassPlan[]): ClassPlan[] {
-  const out = [...existing];
-  for (const c of incoming) {
-    const name = c.name.trim()
-      ? uniqueName(
-          c.name,
-          out.map((o) => o.name),
-        )
-      : c.name;
-    out.push({ ...c, id: newId(), name });
-  }
-  return out;
 }
 
 // ---------------------------------------------------------------------------

@@ -10,12 +10,9 @@ import {
   capacity,
   conflictSeats,
   emptyClass,
-  exportBackup,
   loadState,
-  mergeClasses,
   moveStudent,
   normalizeClass,
-  parseBackup,
   seatKey,
   STORAGE_V1,
   STORAGE_V2,
@@ -71,7 +68,7 @@ export function App() {
       localStorage.setItem(STORAGE_V2, JSON.stringify(app));
     } catch {
       setNotice({
-        text: "Enregistrement impossible dans ce navigateur : pensez à exporter une sauvegarde.",
+        text: "Enregistrement impossible dans ce navigateur : vos changements seront perdus en fermant la page.",
         tone: "error",
       });
     }
@@ -158,39 +155,6 @@ export function App() {
     }
     setSelected(null);
     setTab("plan");
-  };
-
-  const exportAll = () => {
-    const blob = new Blob([exportBackup(app.classes)], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `plans-de-classe-${new Date().toISOString().slice(0, 10)}.json`;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    window.setTimeout(() => URL.revokeObjectURL(url), 1000);
-    setNotice({
-      text: `Sauvegarde de ${app.classes.length} classe${app.classes.length > 1 ? "s" : ""} téléchargée.`,
-      tone: "info",
-    });
-  };
-  const importBackup = async (f: File) => {
-    try {
-      const incoming = parseBackup(await f.text());
-      // Une classe vide et sans nom (premier lancement) est remplacée plutôt que gardée
-      const keep = app.classes.filter((c) => c.students.length || c.name.trim());
-      const classes = mergeClasses(keep, incoming);
-      const first = classes[keep.length] as ClassPlan;
-      setApp({ classes, currentId: first.id });
-      setTab("plan");
-      setNotice({
-        text: `${incoming.length} classe${incoming.length > 1 ? "s" : ""} importée${incoming.length > 1 ? "s" : ""}.`,
-        tone: "info",
-      });
-    } catch (e) {
-      setNotice({ text: e instanceof Error ? e.message : "Sauvegarde illisible.", tone: "error" });
-    }
   };
 
   const changeLayout = (l: Partial<Layout>) => {
@@ -380,7 +344,7 @@ export function App() {
                   aria-current={tab === t ? "page" : undefined}
                   className={`rounded-md px-3 py-1.5 text-sm font-semibold transition sm:px-4 ${tab === t ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"}`}
                 >
-                  {t === "import" ? "Importer / sauvegarder" : "Plan de la classe"}
+                  {t === "import" ? "Importer une liste" : "Plan de la classe"}
                 </button>
               ))}
             </nav>
@@ -413,13 +377,7 @@ export function App() {
       )}
 
       {tab === "import" ? (
-        <ImportPanel
-          current={cls}
-          onImport={onImport}
-          onExportBackup={exportAll}
-          onImportBackup={(f) => void importBackup(f)}
-          onDeleteClass={deleteClass}
-        />
+        <ImportPanel current={cls} onImport={onImport} onDeleteClass={deleteClass} />
       ) : (
         <main className="mx-auto flex max-w-7xl flex-col gap-6 px-4 py-6 sm:px-6 lg:flex-row print:block print:max-w-none print:p-0">
           <aside
