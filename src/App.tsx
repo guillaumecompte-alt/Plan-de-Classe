@@ -18,7 +18,6 @@ import {
   STORAGE_V2,
   CLASS_NAMES,
   isValidClassName,
-  pdfFileName,
   withLayout,
   type AppState,
   type ClassPlan,
@@ -27,6 +26,7 @@ import {
   type Layout,
   type PlaceMode,
 } from "@/lib/plan";
+import { downloadPlanPdf } from "@/lib/pdf";
 
 type Notice = { text: string; tone: "info" | "error"; undo?: ClassPlan | undefined };
 
@@ -236,19 +236,16 @@ export function App() {
       return;
     }
     setNameMissing(false);
-    setNotice(null);
-    setTab("plan");
     setSelected(null);
-    const prevTitle = document.title;
-    // Le navigateur utilise le titre de la page comme nom du fichier PDF
-    const fileName = pdfFileName(cls.name);
-    window.setTimeout(() => {
-      document.title = fileName;
-      window.print();
-      document.title = prevTitle;
-    }, 150);
+    // Le PDF est créé dans la page et téléchargé directement (pas de fenêtre d'impression)
+    downloadPlanPdf(cls)
+      .then((fileName) => setNotice({ text: `PDF téléchargé : ${fileName}`, tone: "info" }))
+      .catch((e: unknown) => {
+        console.error(e);
+        setNotice({ text: "La création du PDF a échoué. Réessayez.", tone: "error" });
+      });
   };
-  // Ctrl+P / Cmd+P passe par la même vérification que le bouton
+  // Ctrl+P / Cmd+P crée aussi le PDF, avec la même vérification que le bouton
   const printRef = useRef(print);
   printRef.current = print;
   useEffect(() => {

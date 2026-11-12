@@ -2,9 +2,17 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { App } from "./App";
+import { downloadPlanPdf } from "./lib/pdf";
+
+vi.mock("./lib/pdf", () => ({
+  downloadPlanPdf: vi.fn(async () => "6A_plandeclasse_09.11.2026.pdf"),
+}));
 
 describe("App", () => {
-  beforeEach(() => localStorage.clear());
+  beforeEach(() => {
+    localStorage.clear();
+    vi.clearAllMocks();
+  });
   afterEach(() => localStorage.clear());
 
   it("s'ouvre sur l'import quand aucune classe n'est enregistrée", () => {
@@ -48,13 +56,8 @@ describe("App", () => {
     });
   });
 
-  it("refuse l'export PDF tant que le nom de la classe n'est pas choisi, puis nomme le fichier", () => {
-    vi.useFakeTimers();
-    vi.setSystemTime(new Date(2026, 10, 9, 10));
-    const titles: string[] = [];
-    const printSpy = vi
-      .spyOn(window, "print")
-      .mockImplementation(() => titles.push(document.title));
+  it("refuse l'export PDF sans nom de classe, puis télécharge le PDF sans fenêtre d'impression", async () => {
+    const printSpy = vi.spyOn(window, "print").mockImplementation(() => {});
     localStorage.setItem(
       "plan-de-classe-v1",
       JSON.stringify({ className: "5e B", students: [{ id: "b", name: "PETIT Tom" }], seats: {} }),
@@ -65,18 +68,22 @@ describe("App", () => {
     expect(screen.getByText("Nom (était « 5e B »)")).toBeInTheDocument();
 
     fireEvent.click(screen.getByText("Exporter en PDF"));
-    vi.advanceTimersByTime(300);
-    expect(printSpy).not.toHaveBeenCalled();
+    expect(downloadPlanPdf).not.toHaveBeenCalled();
     expect(screen.getByRole("alert")).toHaveTextContent("Choisissez le nom de la classe");
     expect(select).toHaveAttribute("aria-invalid", "true");
 
     fireEvent.change(select, { target: { value: "6A" } });
     fireEvent.click(screen.getByText("Exporter en PDF"));
-    vi.advanceTimersByTime(300);
-    expect(printSpy).toHaveBeenCalledTimes(1);
-    expect(titles).toEqual(["6A_plandeclasse_09.11.2026"]);
-    expect(document.title).not.toBe("6A_plandeclasse_09.11.2026");
-    vi.useRealTimers();
+    expect(downloadPlanPdf).toHaveBeenCalledTimes(1);
+    expect(vi.mocked(downloadPlanPdf).mock.calls[0]?.[0].name).toBe("6A");
+    expect(
+      await screen.findByText("PDF téléchargé : 6A_plandeclasse_09.11.2026.pdf"),
+    ).toBeInTheDocument();
+
+    // Ctrl+P crée aussi le PDF au lieu d'ouvrir l'impression
+    fireEvent.keyDown(window, { key: "p", ctrlKey: true });
+    expect(downloadPlanPdf).toHaveBeenCalledTimes(2);
+    expect(printSpy).not.toHaveBeenCalled();
   });
 
   it("n'autorise pas deux classes avec le même nom", () => {
