@@ -42,11 +42,10 @@ async function readRows(f: File): Promise<unknown[][]> {
 
 type Props = {
   current: ClassPlan;
-  onImport: (list: { name: string; gender: Gender }[], into: "current" | "new") => void;
-  onDeleteClass: () => void;
+  onImport: (list: { name: string; gender: Gender }[]) => void;
 };
 
-export function ImportPanel({ current, onImport, onDeleteClass }: Props) {
+export function ImportPanel({ current, onImport }: Props) {
   const fileRef = useRef<HTMLInputElement>(null);
   const [parsed, setParsed] = useState<Parsed | null>(null);
   const [error, setError] = useState("");
@@ -82,7 +81,6 @@ export function ImportPanel({ current, onImport, onDeleteClass }: Props) {
   const setMap = (patch: Partial<Mapping>) =>
     parsed && setParsed({ ...parsed, mapping: { ...parsed.mapping, ...patch } });
   const genders = list.filter((s) => s.gender).length;
-  const className = current.name.trim() || "cette classe";
 
   const select =
     "w-full rounded-md border bg-background px-2 py-1.5 text-sm outline-none focus:ring-2 focus:ring-primary";
@@ -234,33 +232,21 @@ export function ImportPanel({ current, onImport, onDeleteClass }: Props) {
 
           {current.students.length > 0 && (
             <p className="mt-4 text-xs text-muted-foreground">
-              Importer dans « {className} » remplace sa liste actuelle ({current.students.length}{" "}
-              élèves). Les élèves dont le nom n'a pas changé gardent leur place.
+              Cette liste remplace la liste actuelle ({current.students.length} élèves). Les élèves
+              dont le nom n'a pas changé gardent leur place.
             </p>
           )}
           <div className="mt-4 flex flex-wrap gap-2">
             <button
               disabled={!list.length}
               onClick={() => {
-                onImport(list, "current");
+                onImport(list);
                 setParsed(null);
               }}
               className="rounded-md bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition hover:bg-accent disabled:opacity-40"
             >
-              Importer dans « {className} »
+              Importer la liste
             </button>
-            {current.students.length > 0 && (
-              <button
-                disabled={!list.length}
-                onClick={() => {
-                  onImport(list, "new");
-                  setParsed(null);
-                }}
-                className={`${btn} border-primary text-primary disabled:opacity-40`}
-              >
-                Dans une nouvelle classe
-              </button>
-            )}
             <button onClick={() => setParsed(null)} className={`${btn} text-muted-foreground`}>
               Annuler
             </button>
@@ -269,17 +255,8 @@ export function ImportPanel({ current, onImport, onDeleteClass }: Props) {
       )}
 
       <p className="text-center text-xs text-muted-foreground">
-        Vos classes sont enregistrées dans ce navigateur, sur cet ordinateur uniquement.
+        Votre plan est enregistré dans ce navigateur, sur cet ordinateur uniquement.
       </p>
-
-      <div className="text-right">
-        <button
-          onClick={onDeleteClass}
-          className="rounded-md px-3 py-1.5 text-sm text-destructive hover:bg-destructive/10"
-        >
-          Supprimer la classe « {className} »
-        </button>
-      </div>
     </main>
   );
 }

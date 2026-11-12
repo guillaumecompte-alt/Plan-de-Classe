@@ -9,7 +9,6 @@ import {
   autoPlace,
   capacity,
   conflictSeats,
-  emptyClass,
   loadState,
   moveStudent,
   normalizeClass,
@@ -110,49 +109,14 @@ export function App() {
   };
   const drag = usePointerDrag(place);
 
-  const switchClass = (id: string) => {
-    setApp((a) => ({ ...a, currentId: id }));
-    setSelected(null);
-    setNotice(null);
-    const next = app.classes.find((c) => c.id === id);
-    setTab(next?.students.length ? "plan" : "import");
-  };
-  const addClass = () => {
-    const c = emptyClass();
-    setApp((a) => ({ classes: [...a.classes, c], currentId: c.id }));
-    setSelected(null);
-    setNotice(null);
-    setTab("import");
-  };
-  const deleteClass = () => {
-    const label = cls.name.trim() || "cette classe";
-    if (!window.confirm(`Supprimer « ${label} » et son plan ? Cette action est définitive.`))
-      return;
-    setApp((a) => {
-      const rest = a.classes.filter((c) => c.id !== a.currentId);
-      const classes = rest.length ? rest : [emptyClass()];
-      return { classes, currentId: (classes[0] as ClassPlan).id };
+  const onImport = (list: { name: string; gender: Gender }[]) => {
+    const { cls: c, kept } = applyImport(cls, list);
+    updateClass(() => c);
+    setNotice({
+      text: `${list.length} élèves importés.${kept ? ` ${kept} gardent leur place.` : ""}`,
+      tone: "info",
+      undo: cls.students.length ? cls : undefined,
     });
-    setNotice({ text: `« ${label} » a été supprimée.`, tone: "info" });
-  };
-
-  const onImport = (list: { name: string; gender: Gender }[], into: "current" | "new") => {
-    if (into === "new") {
-      const { cls: c } = applyImport(emptyClass(), list);
-      setApp((a) => ({ classes: [...a.classes, c], currentId: c.id }));
-      setNotice({
-        text: `${list.length} élèves importés dans une nouvelle classe. Choisissez son nom dans le menu.`,
-        tone: "info",
-      });
-    } else {
-      const { cls: c, kept } = applyImport(cls, list);
-      updateClass(() => c);
-      setNotice({
-        text: `${list.length} élèves importés.${kept ? ` ${kept} gardent leur place.` : ""}`,
-        tone: "info",
-        undo: cls.students.length ? cls : undefined,
-      });
-    }
     setSelected(null);
     setTab("plan");
   };
@@ -258,7 +222,6 @@ export function App() {
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, []);
-  const takenNames = new Set(app.classes.filter((c) => c.id !== cls.id).map((c) => c.name));
 
   const field =
     "rounded-md border bg-background px-3 py-1.5 text-sm outline-none focus:ring-2 focus:ring-primary";
@@ -270,26 +233,6 @@ export function App() {
         <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3 px-4 py-3 sm:px-6">
           <h1 className="font-display text-2xl font-semibold text-primary">Plan de classe</h1>
           <div className="flex flex-wrap items-center gap-2">
-            <select
-              value={cls.id}
-              onChange={(e) => switchClass(e.target.value)}
-              aria-label="Classe affichée"
-              className={`${field} max-w-44`}
-            >
-              {app.classes.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.name.trim() || "Classe sans nom"}
-                  {c.students.length ? ` (${c.students.length})` : ""}
-                </option>
-              ))}
-            </select>
-            <button
-              onClick={addClass}
-              className="rounded-md border px-3 py-1.5 text-sm font-semibold hover:bg-secondary"
-              title="Créer une autre classe"
-            >
-              + Classe
-            </button>
             <select
               ref={nameRef}
               value={hasName ? cls.name : ""}
@@ -318,9 +261,8 @@ export function App() {
               {[6, 5, 4, 3].map((level) => (
                 <optgroup key={level} label={`${level}e`}>
                   {CLASS_NAMES.filter((n) => n.startsWith(String(level))).map((n) => (
-                    <option key={n} value={n} disabled={takenNames.has(n)}>
+                    <option key={n} value={n}>
                       {n}
-                      {takenNames.has(n) ? " (déjà utilisée)" : ""}
                     </option>
                   ))}
                 </optgroup>
@@ -374,7 +316,7 @@ export function App() {
       )}
 
       {tab === "import" ? (
-        <ImportPanel current={cls} onImport={onImport} onDeleteClass={deleteClass} />
+        <ImportPanel current={cls} onImport={onImport} />
       ) : (
         <main className="mx-auto flex max-w-7xl flex-col gap-6 px-4 py-6 sm:px-6 lg:flex-row print:block print:max-w-none print:p-0">
           <aside

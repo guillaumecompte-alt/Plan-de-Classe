@@ -85,20 +85,4 @@ describe("App", () => {
     expect(downloadPlanPdf).toHaveBeenCalledTimes(2);
     expect(printSpy).not.toHaveBeenCalled();
   });
-
-  it("n'autorise pas deux classes avec le même nom", () => {
-    localStorage.setItem(
-      "plan-de-classe-v2",
-      JSON.stringify({
-        currentId: "b",
-        classes: [
-          { id: "a", name: "3R", students: [] },
-          { id: "b", name: "", students: [] },
-        ],
-      }),
-    );
-    render(<App />);
-    const option = screen.getByRole("option", { name: "3R (déjà utilisée)" }) as HTMLOptionElement;
-    expect(option.disabled).toBe(true);
-  });
 });

@@ -15,7 +15,6 @@ Site en ligne : https://plan-de-classe.outilotheque.fr/
   dont le nom n'a pas changé.
 - **Placement à la souris, au doigt et au clavier** : glisser-déposer (appui long sur tablette / TBI), ou
   toucher un élève puis une place. Poser un élève sur une place occupée échange les deux.
-- **Plusieurs classes**, chacune avec son plan.
 - **Salle configurable** : 1 à 6 colonnes de tables, 1 à 10 rangées, 1 à 4 places par table.
 - **Placement automatique** : au hasard ou en alternant filles et garçons, en plaçant devant les élèves
   prioritaires et en séparant les élèves qui ne doivent pas être voisins. Bouton « Annuler ».
